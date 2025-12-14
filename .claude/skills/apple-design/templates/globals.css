@@ -1,0 +1,246 @@
+/**
+ * Apple Design System - Global Styles
+ *
+ * This file includes:
+ * - CSS variables for semantic colors (light/dark mode)
+ * - Base layer styles
+ * - Accessibility utilities
+ * - Custom utility classes
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* CSS Variables for Semantic Colors */
+  :root {
+    /* Light mode backgrounds */
+    --background-primary: #ffffff;
+    --background-secondary: #f5f5f7;
+    --background-tertiary: #ffffff;
+
+    /* Light mode labels (text) */
+    --label-primary: rgba(0, 0, 0, 0.85);
+    --label-secondary: rgba(0, 0, 0, 0.55);
+    --label-tertiary: rgba(0, 0, 0, 0.30);
+    --label-quaternary: rgba(0, 0, 0, 0.18);
+
+    /* System colors */
+    --system-blue: #007aff;
+    --system-green: #34c759;
+    --system-red: #ff3b30;
+    --system-orange: #ff9500;
+    --system-yellow: #ffcc00;
+
+    /* Separators */
+    --separator-opaque: #c6c6c8;
+    --separator-nonOpaque: rgba(60, 60, 67, 0.36);
+
+    /* Fill colors (for UI elements) */
+    --fill-primary: rgba(120, 120, 128, 0.36);
+    --fill-secondary: rgba(120, 120, 128, 0.32);
+    --fill-tertiary: rgba(118, 118, 128, 0.24);
+    --fill-quaternary: rgba(116, 116, 128, 0.18);
+  }
+
+  .dark {
+    /* Dark mode backgrounds */
+    --background-primary: #000000;
+    --background-secondary: #1c1c1e;
+    --background-tertiary: #2c2c2e;
+
+    /* Dark mode labels (text) */
+    --label-primary: rgba(255, 255, 255, 0.85);
+    --label-secondary: rgba(255, 255, 255, 0.55);
+    --label-tertiary: rgba(255, 255, 255, 0.30);
+    --label-quaternary: rgba(255, 255, 255, 0.18);
+
+    /* Separators */
+    --separator-opaque: #38383a;
+    --separator-nonOpaque: rgba(84, 84, 88, 0.65);
+
+    /* Fill colors (for UI elements) */
+    --fill-primary: rgba(120, 120, 128, 0.36);
+    --fill-secondary: rgba(120, 120, 128, 0.32);
+    --fill-tertiary: rgba(118, 118, 128, 0.24);
+    --fill-quaternary: rgba(116, 116, 128, 0.18);
+  }
+
+  /* Base HTML styles */
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background-primary text-label-primary;
+  }
+
+  /* Ensure smooth scrolling */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Focus visible styles (keyboard navigation) */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-apple-blue-500 ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Screen reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only-focusable:focus,
+  .sr-only-focusable:active {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Safe area utilities for mobile devices */
+  @supports (padding: env(safe-area-inset-top)) {
+    .safe-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .safe-left {
+      padding-left: env(safe-area-inset-left);
+    }
+
+    .safe-right {
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .safe-x {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .safe-y {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}
+
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-background-primary/80 backdrop-blur-xl;
+  }
+
+  /* Custom scrollbar styles (WebKit browsers) */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-apple-gray-300 dark:bg-apple-gray-700 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-apple-gray-400 dark:bg-apple-gray-600;
+  }
+}
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessibility: Ensure minimum contrast for ::selection */
+::selection {
+  @apply bg-apple-blue-500/30 text-label-primary;
+}
+
+/* Print styles */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  pre {
+    white-space: pre-wrap !important;
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
