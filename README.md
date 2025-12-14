@@ -11,6 +11,7 @@ skills-sample/
 ├── CLAUDE.md               # プロジェクト指示
 ├── README.md               # このファイル
 ├── docs/
+│   ├── 2025-12-14-caveat-the-messages-below-were-generated-by-the-u.txt  # Claude Code やりとり履歴
 │   └── images/
 │       └── sample.png      # サンプル画像
 └── .claude/
