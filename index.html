@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>休業・営業時間案内 作成ツール（MVP）</title>
+    <style>
+      /* Apple Design System - CSS Variables */
+      :root {
+        /* Light mode backgrounds */
+        --background-primary: #ffffff;
+        --background-secondary: #f5f5f7;
+        --background-tertiary: #ffffff;
+
+        /* Light mode labels */
+        --label-primary: rgba(0, 0, 0, 0.85);
+        --label-secondary: rgba(0, 0, 0, 0.55);
+        --label-tertiary: rgba(0, 0, 0, 0.3);
+        --label-quaternary: rgba(0, 0, 0, 0.18);
+
+        /* System colors */
+        --system-blue: #007aff;
+        --system-blue-hover: #0062cc;
+        --system-green: #34c759;
+        --system-red: #ff3b30;
+        --system-orange: #ff9500;
+
+        /* Grays */
+        --gray-50: #f5f5f7;
+        --gray-100: #e8e8ed;
+        --gray-200: #d1d1d6;
+        --gray-300: #c7c7cc;
+        --gray-400: #aeaeb2;
+        --gray-500: #8e8e93;
+        --gray-600: #636366;
+        --gray-700: #48484a;
+        --gray-800: #3a3a3c;
+        --gray-900: #1c1c1e;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px 0 rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 32px 0 rgba(0, 0, 0, 0.14);
+
+        /* Border radius */
+        --radius-sm: 6px;
+        --radius: 10px;
+        --radius-lg: 14px;
+        --radius-xl: 20px;
+
+        /* Transitions */
+        --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Reset & Base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px;
+        line-height: 22px;
+        color: var(--label-primary);
+        background-color: var(--background-secondary);
+        min-height: 100vh;
+      }
+
+      /* Typography */
+      .text-large-title {
+        font-size: 34px;
+        line-height: 41px;
+        font-weight: 700;
+      }
+      .text-title-1 {
+        font-size: 28px;
+        line-height: 34px;
+        font-weight: 700;
+      }
+      .text-title-2 {
+        font-size: 22px;
+        line-height: 28px;
+        font-weight: 700;
+      }
+      .text-title-3 {
+        font-size: 20px;
+        line-height: 25px;
+        font-weight: 600;
+      }
+      .text-headline {
+        font-size: 17px;
+        line-height: 22px;
+        font-weight: 600;
+      }
+      .text-body {
+        font-size: 17px;
+        line-height: 22px;
+        font-weight: 400;
+      }
+      .text-callout {
+        font-size: 16px;
+        line-height: 21px;
+        font-weight: 400;
+      }
+      .text-subheadline {
+        font-size: 15px;
+        line-height: 20px;
+        font-weight: 400;
+      }
+      .text-footnote {
+        font-size: 13px;
+        line-height: 18px;
+        font-weight: 400;
+      }
+      .text-caption {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 400;
+      }
+
+      /* Header */
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        width: 100%;
+        border-bottom: 1px solid var(--gray-200);
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .header-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--label-primary);
+      }
+
+      .header-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        background-color: var(--gray-100);
+        border-radius: 20px;
+        font-size: 13px;
+        color: var(--label-secondary);
+        margin-left: 12px;
+      }
+
+      /* Main Layout */
+      .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 1024px) {
+        .main-container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Card */
+      .card {
+        background-color: var(--background-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        padding: 24px;
+      }
+
+      /* Section */
+      .section {
+        margin-bottom: 28px;
+      }
+
+      .section:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--label-primary);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+      }
+
+      .section-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background-color: var(--system-blue);
+        color: white;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 600;
+        margin-right: 10px;
+      }
+
+      /* Form Elements */
+      .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+
+      .form-group {
+        flex: 1;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 13px;
+        color: var(--label-secondary);
+        margin-bottom: 6px;
+        font-weight: 400;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        height: 44px;
+        padding: 0 16px;
+        font-size: 17px;
+        font-family: inherit;
+        color: var(--label-primary);
+        background-color: var(--background-secondary);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        outline: none;
+        transition: all var(--transition);
+      }
+
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        border-color: var(--system-blue);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+      }
+
+      .form-input::placeholder,
+      .form-textarea::placeholder {
+        color: var(--label-tertiary);
+      }
+
+      .form-textarea {
+        height: auto;
+        min-height: 100px;
+        padding: 12px 16px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 40px;
+      }
+
+      /* Date Input */
+      .date-input {
+        position: relative;
+      }
+
+      .date-input input[type="date"] {
+        width: 100%;
+        height: 44px;
+        padding: 0 16px;
+        font-size: 17px;
+        font-family: inherit;
+        color: var(--label-primary);
+        background-color: var(--background-secondary);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        outline: none;
+        transition: all var(--transition);
+      }
+
+      .date-input input[type="date"]:focus {
+        border-color: var(--system-blue);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 24px;
+        font-size: 17px;
+        font-weight: 500;
+        font-family: inherit;
+        border-radius: var(--radius);
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+      }
+
+      .btn:active {
+        transform: scale(0.96);
+      }
+
+      .btn-primary {
+        background-color: var(--system-blue);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--system-blue-hover);
+      }
+
+      .btn-secondary {
+        background-color: var(--background-secondary);
+        color: var(--label-primary);
+        border: 1px solid var(--gray-200);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-100);
+      }
+
+      .btn-tinted {
+        background-color: rgba(0, 122, 255, 0.1);
+        color: var(--system-blue);
+      }
+
+      .btn-tinted:hover {
+        background-color: rgba(0, 122, 255, 0.2);
+      }
+
+      .btn-success {
+        background-color: var(--system-green);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #2db350;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      /* Hint Text */
+      .hint-text {
+        font-size: 13px;
+        color: var(--label-tertiary);
+        margin-top: 8px;
+      }
+
+      /* Preview Section */
+      .preview-card {
+        background-color: var(--background-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .preview-header {
+        padding: 16px 24px;
+        background-color: var(--background-secondary);
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .preview-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--label-primary);
+      }
+
+      .preview-content {
+        padding: 32px;
+      }
+
+      .preview-document {
+        background-color: white;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        padding: 32px;
+        min-height: 400px;
+      }
+
+      .preview-document-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--label-primary);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .preview-document-intro {
+        font-size: 15px;
+        color: var(--label-secondary);
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      /* Table */
+      .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+      }
+
+      .preview-table th {
+        background-color: var(--gray-100);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--label-primary);
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .preview-table td {
+        font-size: 14px;
+        color: var(--label-secondary);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--gray-100);
+      }
+
+      .preview-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .preview-empty {
+        color: var(--label-tertiary);
+        font-style: italic;
+      }
+
+      /* Edit Section */
+      .edit-section {
+        margin-top: 24px;
+        padding: 20px;
+        background-color: var(--background-secondary);
+        border-radius: var(--radius);
+      }
+
+      .edit-section-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--label-primary);
+        margin-bottom: 12px;
+      }
+
+      .edit-section-hint {
+        font-size: 13px;
+        color: var(--system-red);
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background-color: var(--gray-200);
+        margin: 20px 0;
+      }
+
+      /* Scrollable */
+      .scrollable {
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .main-container {
+          padding: 16px;
+        }
+
+        .form-row {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .btn-group {
+          flex-direction: column;
+        }
+
+        .btn-group .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div style="display: flex; align-items: center">
+          <h1 class="header-title">休業・営業時間案内 作成ツール（MVP）</h1>
+          <span class="header-badge">印刷 / PDF保存対応</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+      <!-- Left Panel - Form -->
+      <div class="card scrollable">
+        <!-- Section 1: 医療機関種別 -->
+        <div class="section">
+          <h2 class="section-title">
+            <span class="section-number">1</span>
+            医療機関種別
+          </h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">種別</label>
+              <select class="form-select" id="facilityType">
+                <option value="clinic">クリニック</option>
+                <option value="hospital">病院</option>
+                <option value="pharmacy" selected>薬局</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">主語</label>
+              <select class="form-select" id="subjectType">
+                <option value="当薬局" selected>当薬局</option>
+                <option value="当院">当院</option>
+                <option value="当クリニック">当クリニック</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: 案内期間 -->
+        <div class="section">
+          <h2 class="section-title">
+            <span class="section-number">2</span>
+            案内期間
+          </h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">開始日</label>
+              <div class="date-input">
+                <input type="date" id="startDate" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">終了日</label>
+              <div class="date-input">
+                <input type="date" id="endDate" />
+              </div>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top: 16px">
+            <button class="btn btn-primary" onclick="generateDates()">
+              日付一覧を生成
+            </button>
+            <button class="btn btn-secondary" onclick="clearDates()">
+              日付をクリア
+            </button>
+          </div>
+          <p class="hint-text">
+            ※ 生成後、各日付の営業時間やメモ、文字色を編集できます。
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Section 3: 医療機関情報 -->
+        <div class="section">
+          <h2 class="section-title">
+            <span class="section-number">3</span>
+            医療機関情報
+          </h2>
+          <div class="form-group" style="margin-bottom: 12px">
+            <label class="form-label">医療機関名</label>
+            <input
+              type="text"
+              class="form-input"
+              id="facilityName"
+              placeholder="例：○○薬局 / ○○クリニック"
+            />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">代表電話番号</label>
+              <input
+                type="tel"
+                class="form-input"
+                id="phoneNumber"
+                placeholder="例：03-1234-5678"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">FAX番号</label>
+              <input
+                type="tel"
+                class="form-input"
+                id="faxNumber"
+                placeholder="例：03-1234-5679"
+              />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 12px">
+            <label class="form-label">営業時間外の連絡先・案内</label>
+            <textarea
+              class="form-textarea"
+              id="afterHoursInfo"
+              placeholder="例：営業時間外は留守番電話をご利用ください。緊急時は○○へ…"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Section 4: タイトル・導入文 -->
+        <div class="section">
+          <h2 class="section-title">
+            <span class="section-number">4</span>
+            タイトル・導入文
+          </h2>
+          <div class="form-group" style="margin-bottom: 12px">
+            <label class="form-label">タイトルテンプレ</label>
+            <select
+              class="form-select"
+              id="titleTemplate"
+              onchange="updateTitle()"
+            >
+              <option value="年末年始の診療時間のお知らせ">
+                年末年始の診療時間のお知らせ
+              </option>
+              <option value="夏季休業のお知らせ">夏季休業のお知らせ</option>
+              <option value="ゴールデンウィーク期間の営業について">
+                ゴールデンウィーク期間の営業について
+              </option>
+              <option value="臨時休業のお知らせ">臨時休業のお知らせ</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 12px">
+            <label class="form-label">タイトル（編集可）</label>
+            <input
+              type="text"
+              class="form-input"
+              id="documentTitle"
+              value="年末年始の診療時間のお知らせ"
+            />
+          </div>
+          <div class="form-group" style="margin-bottom: 12px">
+            <label class="form-label">導入文テンプレ</label>
+            <select
+              class="form-select"
+              id="introTemplate"
+              onchange="updateIntro()"
+            >
+              <option
+                value="平素より{SUBJECT}をご利用いただき、誠にありがとうございます。"
+              >
+                平素より{SUBJECT}をご利用いただき、誠にありがとう…
+              </option>
+              <option
+                value="いつも{SUBJECT}をご利用いただき、ありがとうございます。"
+              >
+                いつも{SUBJECT}をご利用いただき、ありがとう…
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">導入文（編集可）</label>
+            <textarea class="form-textarea" id="introText">
+平素より当薬局をご利用いただき、誠にありがとうございます。
+下記の期間、診療時間が通常と異なりますのでご案内いたします。</textarea
+            >
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Section 5: 掲示物 -->
+        <div class="section">
+          <h2 class="section-title">
+            <span class="section-number">5</span>
+            掲示物
+          </h2>
+          <div class="btn-group">
+            <button
+              class="btn btn-success"
+              onclick="updatePreview()"
+              style="flex: 1"
+            >
+              掲示物を生成 / 更新
+            </button>
+          </div>
+          <div class="btn-group" style="margin-top: 12px">
+            <button class="btn btn-tinted" onclick="printDocument()">
+              印刷する（PDF保存もこちら）
+            </button>
+            <button class="btn btn-secondary" onclick="saveData()">
+              入力を保存
+            </button>
+          </div>
+          <p class="hint-text">
+            ※ PDF保存は、印刷ダイアログで「PDFに保存」を選択。
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Panel - Preview -->
+      <div class="preview-card">
+        <div class="preview-header">
+          <h2 class="preview-title">プレビュー</h2>
+        </div>
+        <div class="preview-content scrollable">
+          <div class="preview-document" id="previewDocument">
+            <h1 class="preview-document-title" id="previewTitle">
+              年末年始の診療時間のお知らせ
+            </h1>
+            <p class="preview-document-intro" id="previewIntro">
+              平素より当薬局をご利用いただき、誠にありがとうございます。<br />下記の期間、診療時間が通常と異なりますのでご案内いたします。
+            </p>
+
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%">日付</th>
+                  <th style="width: 40%">営業時間 / 状態</th>
+                  <th style="width: 35%">備考</th>
+                </tr>
+              </thead>
+              <tbody id="previewTableBody">
+                <tr>
+                  <td colspan="3" class="preview-empty">日付が未生成です。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="edit-section">
+            <h3 class="edit-section-title">日付ごとの編集</h3>
+            <p class="edit-section-hint" id="editHint">
+              日付を生成するとここに編集欄が出ます。
+            </p>
+            <div id="dateEditors"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // 日付データを保持する配列
+      let dateEntries = [];
+
+      // 日付一覧を生成
+      function generateDates() {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (!startDate || !endDate) {
+          alert("開始日と終了日を選択してください。");
+          return;
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (start > end) {
+          alert("終了日は開始日以降の日付を選択してください。");
+          return;
+        }
+
+        dateEntries = [];
+        const current = new Date(start);
+
+        while (current <= end) {
+          const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][
+            current.getDay()
+          ];
+          dateEntries.push({
+            date: new Date(current),
+            dateStr: `${
+              current.getMonth() + 1
+            }/${current.getDate()}（${dayOfWeek}）`,
+            status: "通常営業",
+            note: "",
+          });
+          current.setDate(current.getDate() + 1);
+        }
+
+        renderDateEditors();
+        updatePreview();
+      }
+
+      // 日付をクリア
+      function clearDates() {
+        dateEntries = [];
+        document.getElementById("dateEditors").innerHTML = "";
+        document.getElementById("editHint").style.display = "block";
+        document.getElementById("previewTableBody").innerHTML =
+          '<tr><td colspan="3" class="preview-empty">日付が未生成です。</td></tr>';
+      }
+
+      // 日付編集フォームを生成
+      function renderDateEditors() {
+        const container = document.getElementById("dateEditors");
+        document.getElementById("editHint").style.display = "none";
+
+        let html = "";
+        dateEntries.forEach((entry, index) => {
+          html += `
+          <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+            <span style="min-width: 90px; font-size: 14px; color: var(--label-primary);">${
+              entry.dateStr
+            }</span>
+            <select class="form-select" style="height: 36px; font-size: 14px; flex: 1;" onchange="updateEntry(${index}, 'status', this.value)">
+              <option value="通常営業" ${
+                entry.status === "通常営業" ? "selected" : ""
+              }>通常営業</option>
+              <option value="休業" ${
+                entry.status === "休業" ? "selected" : ""
+              }>休業</option>
+              <option value="午前のみ" ${
+                entry.status === "午前のみ" ? "selected" : ""
+              }>午前のみ</option>
+              <option value="午後のみ" ${
+                entry.status === "午後のみ" ? "selected" : ""
+              }>午後のみ</option>
+              <option value="時短営業" ${
+                entry.status === "時短営業" ? "selected" : ""
+              }>時短営業</option>
+            </select>
+            <input type="text" class="form-input" style="height: 36px; font-size: 14px; flex: 1;" placeholder="備考" value="${
+              entry.note
+            }" onchange="updateEntry(${index}, 'note', this.value)">
+          </div>
+        `;
+        });
+        container.innerHTML = html;
+      }
+
+      // エントリーを更新
+      function updateEntry(index, field, value) {
+        dateEntries[index][field] = value;
+      }
+
+      // タイトルテンプレートを更新
+      function updateTitle() {
+        const template = document.getElementById("titleTemplate").value;
+        document.getElementById("documentTitle").value = template;
+      }
+
+      // 導入文テンプレートを更新
+      function updateIntro() {
+        const template = document.getElementById("introTemplate").value;
+        const subject = document.getElementById("subjectType").value;
+        document.getElementById("introText").value =
+          template.replace("{SUBJECT}", subject) +
+          "\n下記の期間、診療時間が通常と異なりますのでご案内いたします。";
+      }
+
+      // プレビューを更新
+      function updatePreview() {
+        // タイトルを更新
+        const title = document.getElementById("documentTitle").value;
+        document.getElementById("previewTitle").textContent = title;
+
+        // 導入文を更新
+        const intro = document.getElementById("introText").value;
+        document.getElementById("previewIntro").innerHTML = intro.replace(
+          /\n/g,
+          "<br>"
+        );
+
+        // テーブルを更新
+        const tbody = document.getElementById("previewTableBody");
+        if (dateEntries.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="3" class="preview-empty">日付が未生成です。</td></tr>';
+        } else {
+          let html = "";
+          dateEntries.forEach((entry) => {
+            const statusColor =
+              entry.status === "休業" ? "color: var(--system-red);" : "";
+            html += `
+            <tr>
+              <td>${entry.dateStr}</td>
+              <td style="${statusColor}">${entry.status}</td>
+              <td>${entry.note}</td>
+            </tr>
+          `;
+          });
+          tbody.innerHTML = html;
+        }
+      }
+
+      // 印刷
+      function printDocument() {
+        const printContent =
+          document.getElementById("previewDocument").innerHTML;
+        const printWindow = window.open("", "", "width=800,height=600");
+        printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>印刷プレビュー</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+              padding: 40px;
+              color: #333;
+            }
+            .preview-document-title {
+              font-size: 24px;
+              font-weight: 700;
+              text-align: center;
+              margin-bottom: 24px;
+            }
+            .preview-document-intro {
+              font-size: 14px;
+              line-height: 1.8;
+              margin-bottom: 24px;
+            }
+            .preview-table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            .preview-table th {
+              background-color: #f5f5f7;
+              font-size: 13px;
+              font-weight: 600;
+              padding: 10px;
+              text-align: left;
+              border: 1px solid #ddd;
+            }
+            .preview-table td {
+              font-size: 13px;
+              padding: 10px;
+              border: 1px solid #ddd;
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+        </html>
+      `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+
+      // データを保存（ローカルストレージ）
+      function saveData() {
+        const data = {
+          facilityType: document.getElementById("facilityType").value,
+          subjectType: document.getElementById("subjectType").value,
+          facilityName: document.getElementById("facilityName").value,
+          phoneNumber: document.getElementById("phoneNumber").value,
+          faxNumber: document.getElementById("faxNumber").value,
+          afterHoursInfo: document.getElementById("afterHoursInfo").value,
+          documentTitle: document.getElementById("documentTitle").value,
+          introText: document.getElementById("introText").value,
+          dateEntries: dateEntries,
+        };
+        localStorage.setItem("businessHoursData", JSON.stringify(data));
+        alert("入力内容を保存しました。");
+      }
+
+      // ページ読み込み時にデータを復元
+      window.onload = function () {
+        const saved = localStorage.getItem("businessHoursData");
+        if (saved) {
+          const data = JSON.parse(saved);
+          document.getElementById("facilityType").value =
+            data.facilityType || "pharmacy";
+          document.getElementById("subjectType").value =
+            data.subjectType || "当薬局";
+          document.getElementById("facilityName").value =
+            data.facilityName || "";
+          document.getElementById("phoneNumber").value = data.phoneNumber || "";
+          document.getElementById("faxNumber").value = data.faxNumber || "";
+          document.getElementById("afterHoursInfo").value =
+            data.afterHoursInfo || "";
+          document.getElementById("documentTitle").value =
+            data.documentTitle || "年末年始の診療時間のお知らせ";
+          document.getElementById("introText").value = data.introText || "";
+
+          if (data.dateEntries && data.dateEntries.length > 0) {
+            dateEntries = data.dateEntries;
+            renderDateEditors();
+            updatePreview();
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
